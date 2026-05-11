@@ -1,0 +1,123 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color: #111827;
+  background: #f3f4f6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 920px;
+}
+
+.header h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+
+.header p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.06);
+}
+
+.input-panel {
+  margin-top: 1.2rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+label {
+  font-weight: 600;
+}
+
+textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font: inherit;
+  padding: 0.9rem;
+  resize: vertical;
+}
+
+.example-buttons {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.example-btn,
+.analyze-btn {
+  font: inherit;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}
+
+.example-btn {
+  background: #eef2ff;
+  color: #312e81;
+  text-align: left;
+}
+
+.analyze-btn {
+  background: #111827;
+  color: white;
+  font-weight: 600;
+}
+
+.analyze-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.error {
+  color: #b91c1c;
+  margin: 0;
+}
+
+.result-grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.result-grid .full {
+  grid-column: 1 / -1;
+}
+
+h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #111827;
+}
+
+p, ul {
+  margin: 0;
+  color: #374151;
+}
+
+ul {
+  padding-left: 1.1rem;
+}
