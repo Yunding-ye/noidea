@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const EXAMPLES = [
   'If you really cared about me, you would do this.',
@@ -6,13 +6,37 @@ const EXAMPLES = [
   'Everyone will leave you if you do not listen to me.'
 ];
 
-const initialResult = null;
-
 export default function App() {
   const [text, setText] = useState('');
-  const [result, setResult] = useState(initialResult);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const normalized = useMemo(() => {
+    if (!result) return null;
+
+    const dangerScore = Math.max(0, Math.min(100, Number(result.dangerScore) || 0));
+    const confidence = Math.max(0, Math.min(100, Number(result.confidence) || 0));
+    const manipulationTypes = Array.isArray(result.manipulationTypes)
+      ? result.manipulationTypes
+      : [];
+    const specificEvidence = Array.isArray(result.specificEvidence)
+      ? result.specificEvidence
+      : [];
+
+    return {
+      classification: result.classification || 'Unknown',
+      dangerLevel: result.dangerLevel || 'Unknown',
+      dangerScore,
+      confidence,
+      manipulationTypes,
+      evidenceAnalysis: result.evidenceAnalysis || 'No analysis available.',
+      specificEvidence,
+      relationshipAdvice: result.relationshipAdvice || 'No advice available.',
+      recommendedResponse: result.recommendedResponse || 'No response suggestion available.',
+      saferRewrite: result.saferRewrite || 'No healthier rewrite available.'
+    };
+  }, [result]);
 
   const analyzeText = async () => {
     setError('');
@@ -52,7 +76,9 @@ export default function App() {
       <section className="container">
         <header className="header">
           <h1>Manipulative Language Checker</h1>
-          <p>Analyze emotional pressure, coercive patterns, and manipulative language signals.</p>
+          <p>
+            Analyze emotional pressure, coercive patterns, and manipulative language signals.
+          </p>
         </header>
 
         <section className="input-panel card">
@@ -71,30 +97,136 @@ export default function App() {
                 key={example}
                 type="button"
                 className="example-btn"
-                onClick={() => setText(example)}
+                onClick={() => {
+                  setText(example);
+                  setResult(null);
+                  setError('');
+                }}
               >
                 {example}
               </button>
             ))}
           </div>
 
-          <button type="button" className="analyze-btn" onClick={analyzeText} disabled={loading}>
+          <button
+            type="button"
+            className="analyze-btn"
+            onClick={analyzeText}
+            disabled={loading}
+          >
             {loading ? 'Analyzing...' : 'Analyze'}
           </button>
 
           {error && <p className="error">{error}</p>}
         </section>
 
-        {result && (
-          <section className="result-grid">
-            <article className="card"><h3>Is manipulative</h3><p>{result.isManipulative ? 'Yes' : 'No'}</p></article>
-            <article className="card"><h3>Manipulation types</h3><p>{Array.isArray(result.manipulationTypes) ? result.manipulationTypes.join(', ') : 'N/A'}</p></article>
-            <article className="card"><h3>Intensity score</h3><p>{result.intensity ?? 'N/A'}</p></article>
-            <article className="card"><h3>Confidence score</h3><p>{result.confidence ?? 'N/A'}</p></article>
-            <article className="card full"><h3>Explanation</h3><p>{result.explanation || 'N/A'}</p></article>
-            <article className="card full"><h3>Warning signs</h3><ul>{(result.warningSigns || []).map((s) => <li key={s}>{s}</li>)}</ul></article>
-            <article className="card full"><h3>Safer rewrite</h3><p>{result.saferRewrite || 'N/A'}</p></article>
-            <article className="card full"><h3>Recommended action</h3><p>{result.recommendedAction || 'N/A'}</p></article>
+        {normalized && (
+          <section className="results-section">
+            <article className="card summary-card">
+              <h2>Analysis Summary</h2>
+
+              <div className="summary-grid">
+                <div>
+                  <span>Classification</span>
+                  <strong>{normalized.classification}</strong>
+                </div>
+                <div>
+                  <span>Danger Level</span>
+                  <strong>{normalized.dangerLevel}</strong>
+                </div>
+                <div>
+                  <span>Danger Score</span>
+                  <strong>{normalized.dangerScore}/100</strong>
+                </div>
+                <div>
+                  <span>Confidence</span>
+                  <strong>{normalized.confidence}%</strong>
+                </div>
+              </div>
+
+              <div className="score-wrap">
+                <div className="score-label">
+                  <span>Danger Score</span>
+                  <span>{normalized.dangerScore}</span>
+                </div>
+                <div
+                  className="score-track"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={normalized.dangerScore}
+                >
+                  <div
+                    className="score-fill"
+                    style={{ width: `${normalized.dangerScore}%` }}
+                  />
+                </div>
+              </div>
+            </article>
+
+            <article className="card">
+              <h3>Manipulation Types</h3>
+              <div className="chip-row">
+                {normalized.manipulationTypes.length ? (
+                  normalized.manipulationTypes.map((type) => (
+                    <span className="chip" key={type}>
+                      {type}
+                    </span>
+                  ))
+                ) : (
+                  <span className="muted">No manipulation types detected.</span>
+                )}
+              </div>
+            </article>
+
+            <article className="card full">
+              <h3>Evidence-Based Analysis</h3>
+              <p>{normalized.evidenceAnalysis}</p>
+            </article>
+
+            <section className="full">
+              <h3 className="section-title">Specific Evidence</h3>
+              <div className="evidence-grid">
+                {normalized.specificEvidence.length ? (
+                  normalized.specificEvidence.map((item, index) => (
+                    <article
+                      className="card evidence-card"
+                      key={`${item.quote || 'evidence'}-${index}`}
+                    >
+                      <p className="evidence-quote">
+                        “{item.quote || 'No quote provided.'}”
+                      </p>
+                      <p>
+                        <strong>Pattern:</strong> {item.pattern || 'Not specified'}
+                      </p>
+                      <p>
+                        <strong>Explanation:</strong>{' '}
+                        {item.explanation || 'Not specified'}
+                      </p>
+                    </article>
+                  ))
+                ) : (
+                  <article className="card evidence-card">
+                    <p className="muted">No specific evidence snippets provided.</p>
+                  </article>
+                )}
+              </div>
+            </section>
+
+            <article className="card full">
+              <h3>Relationship Advice</h3>
+              <p>{normalized.relationshipAdvice}</p>
+            </article>
+
+            <article className="card full">
+              <h3>Suggested Response</h3>
+              <p>{normalized.recommendedResponse}</p>
+            </article>
+
+            <article className="card full">
+              <h3>Healthier Rewrite</h3>
+              <p>{normalized.saferRewrite}</p>
+            </article>
           </section>
         )}
       </section>
